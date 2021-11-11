@@ -23,9 +23,10 @@ app.use(express.static("public"));
 app.get("/", (req, res) => {
   res.render('home', {
     //looks for variable named startingContent then replaces its value to that of homeStartingContent
-    startingContent: homeStartingContent
+    startingContent: homeStartingContent,
+    entries: entries
   });
-  console.log(entries)
+
 });
 
 
