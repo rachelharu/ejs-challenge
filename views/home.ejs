@@ -7,7 +7,11 @@
 </p>
 
 
-<% console.log(entries); %>
+
+
+<% for(var i=0; i<entries.length; i++) { %>
+<%  console.log(entries[i].title); %>
+<% }; %>
 
 
 <%- include('partials/footer'); -%>
