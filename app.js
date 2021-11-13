@@ -63,7 +63,6 @@ app.post("/compose", (req, res) => {
 
 
 app.get('/posts/:postName', (req, res) => {
-
   const requestedTitle = _.lowerCase(req.params.postName);
 //loops thru posts array to check if any post titles match the storedTitle
   posts.forEach(function(post){
