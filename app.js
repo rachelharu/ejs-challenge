@@ -2,6 +2,7 @@
 
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 const ejs = require("ejs");
 const _ = require("lodash");
 
@@ -10,7 +11,6 @@ const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pelle
 const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices. Arcu dui vivamus arcu felis bibendum. Consectetur adipiscing elit duis tristique. Risus viverra adipiscing at in tellus integer feugiat. Sapien nec sagittis aliquam malesuada bibendum arcu vitae. Consequat interdum varius sit amet mattis. Iaculis nunc sed augue lacus. Interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit. Pulvinar elementum integer enim neque. Ultrices gravida dictum fusce ut placerat orci nulla. Mauris in aliquam sem fringilla ut morbi tincidunt. Tortor posuere ac ut consequat semper viverra nam libero.";
 
 const app = express();
-let posts = [];
 
 app.set('view engine', 'ejs');
 
@@ -20,12 +20,27 @@ app.use(bodyParser.urlencoded({
 app.use(express.static("public"));
 
 
+mongoose.connect("mongodb://localhost:27017/blogDB", {
+  useNewUrlParser: true});
+
+
+const postSchema = {
+  title: String,
+  content: String
+};
+
+const Post = mongoose.model("Post", postSchema);
+
+
+
 //gets the file "home.ejs" and renders it on screen,
 app.get("/", (req, res) => {
-  res.render('home', {
+  Post.find({}, (err, posts) => {
+    res.render('home', {
     //looks for variable named startingContent then replaces its value to that of homeStartingContent
     startingContent: homeStartingContent,
     posts: posts
+    });
   });
 
 });
@@ -43,36 +58,35 @@ app.get("/contact", (req, res) => {
   });
 });
 
+
+
 app.get("/compose", (req, res) => {
   res.render('compose');
-
 });
 
 
 
 //handles the post request to get the input value from the form
 app.post("/compose", (req, res) => {
-  const post = {
-    title: req.body.postTitle,
-    body: req.body.postBody
-  };
-  posts.push(post);
- //redirects to home when submit button clicked
- res.redirect("/");
-});
+  const post = new Post ({
+    title:req.body.postTitle,
+    content:req.body.postBody
+  });
+  post.save(function(err){
+      if (!err){
+          res.redirect("/");
+      }
+    });
+  });
 
-
-app.get('/posts/:postName', (req, res) => {
-  const requestedTitle = _.lowerCase(req.params.postName);
-//loops thru posts array to check if any post titles match the storedTitle
-  posts.forEach(function(post){
-    const storedTitle = _.lowerCase(post.title);
-    if (storedTitle === requestedTitle){
+app.get('/posts/:postId', (req, res) => {
+  const requestedPostId = req.params.postId;
+//l
+  Post.findOne({_id:requestedPostId}, (err, post) => {
       res.render("post", {
         title: post.title,
-        body: post.body
+        content: post.content
       });
-  }
   });
 
 });
